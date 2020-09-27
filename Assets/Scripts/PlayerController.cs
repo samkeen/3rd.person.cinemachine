@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
+using Cursor = UnityEngine.Cursor;
 
 // ReSharper disable InconsistentNaming
 
@@ -15,6 +17,7 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float walkSpeed = 2;
     [SerializeField] private float runSpeed = 3;
+    [SerializeField] private bool lockCursor = true;
 
     [SerializeField] private float speedSmoothTime = 0.1f;
 
@@ -40,8 +43,12 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         this._animator = GetComponent<Animator>();
+        if (lockCursor)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
         // need the camera transform in order to move in direction of camera
-        
         mainCamera = Camera.main.transform;
         
         controller = GetComponent<CharacterController>();
@@ -59,9 +66,6 @@ public class PlayerController : MonoBehaviour
         // turn the input vector into a direction
         //   "When normalized, a vector keeps the same direction but its length is 1.0"
         Vector2 inputDirection = input.normalized;
-        
-        //
-        
         
         bool running = Input.GetKey(KeyCode.LeftShift);
         Move(inputDirection, running);
@@ -141,7 +145,9 @@ public class PlayerController : MonoBehaviour
         // if we are on ground reset our velocity in y direction to zero 
         if (controller.isGrounded)
         {
-            _velocityYAxis = 0;
+            // found better to set slightly negative, else jump presses will not always
+            //    trigger a jump
+            _velocityYAxis = -1;
         }
 
         
